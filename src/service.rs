@@ -8,7 +8,7 @@ use serde_json::json;
 
 use crate::errors::Result;
 use crate::tiles::{get_grid_data, get_tile_data, TileMeta, TileSummaryJSON};
-use crate::utils::{encode, get_blank_image, DataFormat};
+use crate::utils::{encode, get_blank_png, DataFormat};
 
 lazy_static! {
     static ref TILE_URL_RE: Regex =
@@ -174,12 +174,12 @@ pub async fn get_service(
                 _ => {
                     let data =
                         match get_tile_data(&tile_meta.connection_pool.get().unwrap(), z, x, y) {
-                            Ok(data) => data,
-                            Err(_) => get_blank_image(),
+                            Ok(data) => Body::from(data),
+                            Err(_) => Body::from(get_blank_png()),
                         };
                     Ok(response
                         .header(CONTENT_TYPE, DataFormat::new(data_format).content_type())
-                        .body(Body::from(data))
+                        .body(data)
                         .unwrap())
                 }
             };
